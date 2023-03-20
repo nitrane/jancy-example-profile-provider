@@ -349,14 +349,32 @@ function dialog (jancy, browserWindow, provider) {
 
 module.exports = {
 
+  /* jancy_props is an object used to communicate some useful infromation about
+  ** your plugin to the Jancy plugin registry.
+  **
+  ** Required props:
+  **    registryVersion (number) - tells Jancy what version of the plugin registry
+  **                               this plugin was built against. Currently version
+  **                               "1" is supported.
+  **
+  ** Optional props:
+  **    enabled (boolean) - if false, tells Jancy to not enable your plugin by
+  **                        default the first time it loads. Default is true.
+  **
+  */
   jancy_props: {
     registryVersion: 1,
-    enabled: false
   },
 
   /* --------------------------------------------------------------------------
   ** Called by the pluginRegistry when the user has enabled us and we
   ** were previously disabled.
+  **
+  ** This is a good opportunity to add things to Jancy that your plugin
+  ** provides.
+  **
+  ** Arguments:
+  **    jancy (object)
   ** ------------------------------------------------------------------------*/
   jancy_onEnabled(jancy) {
     jancy.profileProviderFactories.addFactory(MyProfileProviderFactory)
@@ -365,13 +383,25 @@ module.exports = {
   /* --------------------------------------------------------------------------
   ** Called by the pluginRegistry when the user has disabled us and
   ** we were previously enabled.
+  **
+  ** This is a good opportunity to remove things from Jancy that your plugin
+  ** added.
+  **
+  ** Arguments:
+  **    jancy (object)
   ** ------------------------------------------------------------------------*/
   jancy_onDisabled(jancy) {
     jancy.profileProviderFactories.removeFactory(MyProfileProviderFactory.id)
   },
 
   /* --------------------------------------------------------------------------
-  ** Called by the pluginRegistry when we are loaded.
+  ** jancy_onInit is called by the plugin registry when the plugin is loaded.
+  **
+  ** This is your first opportunity to iteract with Jancy.
+  **
+  ** Arguments:
+  **    jancy (Object)
+  **    enabled (boolean) -- is our plugin enabled
   ** ------------------------------------------------------------------------*/
   jancy_onInit(jancy, enabled) {
     if (enabled) {
