@@ -39,8 +39,11 @@ class MyProfileProvider {
   ** Returns a promise that should resolve with a boolean to indicate
   ** success or failure.
   */
-  loadPromises(providerId) {
+  loadProfiles(providerId) {
     return new Promise(async (resolve, reject) => {
+
+      this.groupCount = 0
+      this.profileCount = 0
 
       let profiles = []
 
@@ -171,6 +174,16 @@ class MyProfileProvider {
     }
   }
 
+  /* Return an object that can be fed back into the constructor to
+  ** recreate this provider.
+  */
+  getState() {
+    return {
+      name: this.name,
+      url: this.url
+    }
+  }
+
   /* Update this provider from the output of the dialog.
   **
   ** Arguments:
@@ -179,8 +192,8 @@ class MyProfileProvider {
   */
   update(args) {
     this.name = args.name
-    if (args.path !== this.path) {
-      this.path = args.path
+    if (args.url !== this.url) {
+      this.url = args.url
       this.state = 1
     }
   }
@@ -208,7 +221,7 @@ function dialog (jancy, browserWindow, provider) {
     {
       width: 400,
       height: 160,
-      title: provider ? `Edit ${provider.name}` : 'Load profiles from an Arc Airtable CSV',
+      title: provider ? `Edit ${provider.name}` : 'Load profiles from a ficticious API',
     },
     {
       centerRelativeToParent: true
