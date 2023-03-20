@@ -40,7 +40,111 @@ class MyProfileProvider {
   ** success or failure.
   */
   loadPromises(providerId) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+
+      let profiles = []
+
+      /* The following is a deomonstration of what you'd do in Jancy to connect to
+      ** the API at this.url (our fictitious API endpoint) using AXIOS.
+      **
+      ** 
+      ** try {
+      **   const r = await this.jancy.axios.get(this.url)
+      **   if (r.status === 200) {
+      **     profiles = res.data
+      **   } else {
+      **     this.state = 2   // error
+      **     resolve(false)
+      **     return
+      **   }
+      ** } catch(err) {
+      **    this.state = 2    // error
+      **    resolve(false)
+      **   return
+      ** }
+      */
+
+      /* Lets pretend the API returned a couple of profiles in some proprietary format... 
+      */
+      profiles = [
+        {
+          firstName: "Michaela",
+          lastName: "Trombly",
+          email: 'MichaelaCTrombly@rhyta.com',
+          address: "1883 Birch  Street",
+          city: "El Paso",
+          state: "TX",
+          zip: "79936",
+          phone: "1112223333",
+          password: "my-tm-password",   // Ticketmaster password
+          bank: "Comdata",
+          creditCard: "311111111111111",
+          creditCardCVV: "1111",
+          creditCardExpDate: "3/26"
+        },
+        {
+          firstName: "Paula",
+          lastName: "Russell",
+          email: 'PaulaARussell@teleworm.us',
+          address: "2527 Anthony Avenue",
+          city: "Eldorado",
+          state: "TX",
+          zip: "79936",
+          phone: "1112223333",
+          password: "my-tm-password",     // Ticketmaster password
+          bank: "Citi Bank",
+          creditCard: "311111111111112",
+          creditCardCVV: "2222",
+          creditCardExpDate: "3/27"
+        }
+      ]
+
+      /* In order to add these profiles to Jancy first we need to construct profiles suitable for
+      ** Jancy from this profile data.
+      */
+      profiles.forEach(profile => {
+
+        const p = this.jancy.profileFactory.create({
+          providerId,
+          groupName: profile.bank,      // we use bank as a group name in Jancy
+          profileName: `${ profile.firstName } ${ profile.lastName }`,
+          name: `${ profile.firstName } ${ profile.lastName }`,
+          email: profile.email,
+          address: profile.address,
+          city: profile.city,
+          state: profile.state,
+          zip: profile.zip,
+          phoneNumber: profile.phone
+        })
+
+        this.jancy.profileFactory.addCard(p, {
+          number: profile.creditCard,
+          cvv: profile.creditCardCVV,
+          expDate: profile.creditCardExpDate
+        })
+
+        this.jancy.profileFactory.addSite(p, {
+          site: 'ticketmaster',
+          isPattern: false,
+          fields: [
+            {
+              field: 'password',
+              resolver: '$' + profile.password,
+              resolverArgs: []
+            }
+          ]
+        })
+
+        /* We've created a Jancy profile object. Now we have to add it to the registry.
+        ** We keep track of some stats so we can generate a good info string.
+        */
+        this.profileCount++
+        if (this.jancy.profileRegistry.addProfile(p)) {
+          this.groupCount++
+        }
+      })
+
+      this.state = 999
       resolve(true)
     })
   }
@@ -57,9 +161,11 @@ class MyProfileProvider {
   getInfo() {
     switch(this.state) {
       case 0:
-        return this.path ? 'No profiles loaded' : 'URL is not configured'
+        return this.url ? 'No profiles loaded' : 'URL is not configured'
       case 1:
         return 'Press the reload button for changes to take effect'
+      case 2:
+        return `Error interactin with ${ this.url }`
       default:
         return `${ this.groupCount } profile groups containing ${ this.profileCount } profiles loaded from ${ this.url }`
     }
