@@ -126,9 +126,26 @@ class MyProfileProvider {
           expDate: profile.creditCardExpDate
         })
 
+        /* Example of adding a site record to the profile for the registered site "ticketmaster".
+        */
         this.jancy.profileFactory.addSite(p, {
           site: 'ticketmaster',
           isPattern: false,
+          fields: [
+            {
+              field: 'password',
+              resolver: '$' + profile.password,
+              resolverArgs: []
+            }
+          ]
+        })
+
+        /* Example of adding a site record to the profile for a URL that Jancy doesn't know about but
+        ** you would like fields resolved for.
+        */
+        this.jancy.profileFactory.addSite(p, {
+          site: new RegExp('^.*seatgeek\.com.*$'),
+          isPattern: true,
           fields: [
             {
               field: 'password',
